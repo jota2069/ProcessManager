@@ -7,7 +7,7 @@ namespace ProcessManager.Services;
 
 public class ProcessService
 {
-    public List<ProcessInfo> GetAllProcesses9()
+    public List<ProcessInfo> GetAllProcesses()
     {
         List<ProcessInfo> processList = new List<ProcessInfo>();
         Process[] processes = Process.GetProcesses();

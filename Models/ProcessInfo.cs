@@ -5,7 +5,7 @@ namespace ProcessManager.Models;
 
 public class ProcessInfo
 {
-    public int ID { get; set; }
+    public int Id { get; set; }
     public string Name { get; set; }
     public ProcessPriorityClass Priority { get; set; }
     public long MemoryUsage { get; set; }

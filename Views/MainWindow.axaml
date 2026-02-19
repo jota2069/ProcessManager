@@ -5,16 +5,129 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="ProcessManager.Views.MainWindow"
-        x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
-        Title="ProcessManager">
+        Title="Диспетчер процессов"
+        Width="1200"
+        Height="700"
+        Background="#1E1E1E">
 
     <Design.DataContext>
-        <!-- This only sets the DataContext for the previewer in an IDE,
-             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
         <vm:MainWindowViewModel/>
     </Design.DataContext>
-
-    <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-
+    
+    <Grid Margin="15">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Заголовок -->
+        <TextBlock Grid.Row="0"
+                   Text="Диспетчер процессов"
+                   FontSize="28"
+                   FontWeight="Bold"
+                   Margin="0,0,0,20"
+                   Foreground="#E0E0E0"/>
+        
+        <!-- Кнопки сортировки -->
+        <Border Grid.Row="1" 
+                Background="#2D2D30" 
+                CornerRadius="4"
+                Padding="15"
+                Margin="0,0,0,10">
+            <StackPanel>
+                <TextBlock Text="Сортировка:" 
+                           FontSize="14" 
+                           Foreground="#B0B0B0" 
+                           Margin="0,0,0,10"/>
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <Button Content="PID" 
+                            Click="SortByPid_Click" 
+                            Padding="20,8"
+                            Background="#3E3E42"
+                            Foreground="#E0E0E0"
+                            BorderThickness="0"/>
+                    <Button Content="Имя" 
+                            Click="SortByName_Click" 
+                            Padding="20,8"
+                            Background="#3E3E42"
+                            Foreground="#E0E0E0"
+                            BorderThickness="0"/>
+                    <Button Content="Память" 
+                            Click="SortByMemory_Click" 
+                            Padding="20,8"
+                            Background="#3E3E42"
+                            Foreground="#E0E0E0"
+                            BorderThickness="0"/>
+                    <Button Content="Приоритет" 
+                            Click="SortByPriority_Click" 
+                            Padding="20,8"
+                            Background="#3E3E42"
+                            Foreground="#E0E0E0"
+                            BorderThickness="0"/>
+                    <Button Content="Потоки" 
+                            Click="SortByThreads_Click" 
+                            Padding="20,8"
+                            Background="#3E3E42"
+                            Foreground="#E0E0E0"
+                            BorderThickness="0"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+        
+        <!-- Заголовки колонок -->
+        <Border Grid.Row="2" 
+                Background="#252526" 
+                Padding="10,8"
+                Margin="0,0,0,2">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="80"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="150"/>
+                    <ColumnDefinition Width="150"/>
+                    <ColumnDefinition Width="100"/>
+                </Grid.ColumnDefinitions>
+                
+                <TextBlock Grid.Column="0" Text="PID" FontWeight="Bold" Foreground="#E0E0E0"/>
+                <TextBlock Grid.Column="1" Text="Имя процесса" FontWeight="Bold" Foreground="#E0E0E0" Margin="10,0,0,0"/>
+                <TextBlock Grid.Column="2" Text="Память" FontWeight="Bold" Foreground="#E0E0E0"/>
+                <TextBlock Grid.Column="3" Text="Приоритет" FontWeight="Bold" Foreground="#E0E0E0"/>
+                <TextBlock Grid.Column="4" Text="Потоки" FontWeight="Bold" Foreground="#E0E0E0"/>
+            </Grid>
+        </Border>
+        
+        <!-- Список процессов -->
+        <Border Grid.Row="3" 
+                Background="#1E1E1E" 
+                BorderBrush="#3E3E42" 
+                BorderThickness="1">
+            <ScrollViewer>
+                <StackPanel x:Name="ProcessList"/>
+            </ScrollViewer>
+        </Border>
+        
+        <!-- Кнопка обновления -->
+        <StackPanel Grid.Row="4" 
+                    Orientation="Horizontal" 
+                    HorizontalAlignment="Right"
+                    Margin="0,15,0,0"
+                    Spacing="10">
+            <TextBlock x:Name="ProcessCount" 
+                       Text="Процессов: 0" 
+                       VerticalAlignment="Center"
+                       Foreground="#B0B0B0"
+                       Margin="0,0,15,0"/>
+            <Button Content="Обновить"
+                    Click="RefreshButton_Click"
+                    Padding="25,10"
+                    FontSize="14"
+                    Background="#0E639C"
+                    Foreground="White"
+                    BorderThickness="0"/>
+        </StackPanel>
+    </Grid>
 </Window>

@@ -15,6 +15,7 @@
 /home/amin/ProcessManager/bin/Debug/net8.0/Avalonia.Vulkan.dll
 /home/amin/ProcessManager/bin/Debug/net8.0/Avalonia.dll
 /home/amin/ProcessManager/bin/Debug/net8.0/Avalonia.Controls.ColorPicker.dll
+/home/amin/ProcessManager/bin/Debug/net8.0/Avalonia.Controls.DataGrid.dll
 /home/amin/ProcessManager/bin/Debug/net8.0/Avalonia.Desktop.dll
 /home/amin/ProcessManager/bin/Debug/net8.0/Avalonia.Diagnostics.dll
 /home/amin/ProcessManager/bin/Debug/net8.0/Avalonia.Fonts.Inter.dll
@@ -67,6 +68,7 @@
 /home/amin/ProcessManager/obj/Debug/net8.0/ProcessManager.AssemblyInfoInputs.cache
 /home/amin/ProcessManager/obj/Debug/net8.0/ProcessManager.AssemblyInfo.cs
 /home/amin/ProcessManager/obj/Debug/net8.0/ProcessManager.csproj.CoreCompileInputs.cache
+/home/amin/ProcessManager/obj/Debug/net8.0/ProcessManager.sourcelink.json
 /home/amin/ProcessManager/obj/Debug/net8.0/ProcessManager.csproj.CopyComplete
 /home/amin/ProcessManager/obj/Debug/net8.0/ProcessManager.dll
 /home/amin/ProcessManager/obj/Debug/net8.0/refint/ProcessManager.dll

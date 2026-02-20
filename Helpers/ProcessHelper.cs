@@ -9,6 +9,7 @@ using Avalonia.Input;
 using Avalonia.Media;
 using ProcessManager.Models;
 using ProcessManager.Services;
+using System.Collections.ObjectModel;
 
 namespace ProcessManager.Helpers;
 
@@ -58,24 +59,15 @@ public class ProcessHelper
 
     public IEnumerable<ProcessInfo> FilterOnlyWithGui(IEnumerable<ProcessInfo> processes)
     {
-        List<ProcessInfo> filtered = new List<ProcessInfo>();
-        
-        foreach (ProcessInfo proc in processes)
-        {
-            try
-            {
-                Process p = Process.GetProcessById(proc.Id);
-                if (p.MainWindowHandle != IntPtr.Zero)
-                {
-                    filtered.Add(proc);
-                }
-            }
-            catch
-            {
-            }
-        }
-        
-        return filtered;
+        return processes.Where(p => 
+            p.Id > 1000 && // Пользовательские процессы
+            !p.Name.ToLower().Contains("systemd") &&
+            !p.Name.ToLower().Contains("kworker") &&
+            !p.Name.ToLower().Contains("daemon") &&
+            !p.Name.ToLower().Contains("dbus") &&
+            !p.Name.ToLower().Contains("polkit") &&
+            !p.Name.ToLower().Contains("gvfs") &&
+            !p.Name.ToLower().StartsWith("sd-"));
     }
 
     public IEnumerable<ProcessInfo> FilterOnlySystem(IEnumerable<ProcessInfo> processes)
@@ -274,4 +266,70 @@ public class ProcessHelper
             threadsList.Children.Add(border);
         }
     }
+    
+    // === ДЕРЕВО ПРОЦЕССОВ ===
+
+    public ObservableCollection<ProcessTreeNode> BuildTree(List<ProcessInfo> processes)
+    {
+        Dictionary<int, ProcessTreeNode> allNodes = new Dictionary<int, ProcessTreeNode>();
+        Dictionary<int, int> parentMap = new Dictionary<int, int>();
+    
+        // Создаём узлы для всех процессов
+        foreach (ProcessInfo process in processes)
+        {
+            allNodes[process.Id] = new ProcessTreeNode(process);
+            int parentId = _processService.GetParentProcessId(process.Id);
+            if (parentId > 0)
+            {
+                parentMap[process.Id] = parentId;
+            }
+        }
+    
+        // Строим дерево
+        ObservableCollection<ProcessTreeNode> rootNodes = new ObservableCollection<ProcessTreeNode>();
+    
+        foreach (ProcessInfo process in processes)
+        {
+            ProcessTreeNode node = allNodes[process.Id];
+        
+            if (parentMap.ContainsKey(process.Id))
+            {
+                int parentId = parentMap[process.Id];
+                if (allNodes.ContainsKey(parentId))
+                {
+                    allNodes[parentId].Children.Add(node);
+                }
+                else
+                {
+                    rootNodes.Add(node);
+                }
+            }
+            else
+            {
+                rootNodes.Add(node);
+            }
+        }
+    
+        return rootNodes;
+    }
+
+    public ProcessTreeNode? FindNodeById(ObservableCollection<ProcessTreeNode> nodes, int processId)
+    {
+        foreach (ProcessTreeNode node in nodes)
+        {
+            if (node.Process.Id == processId)
+            {
+                return node;
+            }
+        
+            ProcessTreeNode? found = FindNodeById(node.Children, processId);
+            if (found != null)
+            {
+                return found;
+            }
+        }
+    
+        return null;
+    }
+    
 }

@@ -8,6 +8,8 @@ using ProcessManager.Services;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using System.Collections.ObjectModel;
 
 namespace ProcessManager.Views;
 
@@ -177,4 +179,20 @@ public partial class MainWindow : Window
         _helper.UpdateAffinityUI(process, AffinityInfo, CoreCheckboxes);
         _helper.UpdateThreadsUI(process, ThreadsCount, ThreadsList);
     }
+    
+    private void BuildTree_Click(object? sender, RoutedEventArgs e)
+    {
+        _viewModel.LoadProcesses();
+        ProcessTreeView.ItemsSource = _helper.BuildTree(_viewModel.Processes.ToList());
+        TreeInfo.Text = $"Построено дерево из {_viewModel.Processes.Count} процессов";
+    }
+
+    private void ProcessTreeView_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        if (ProcessTreeView.SelectedItem is ProcessTreeNode node)
+        {
+            OnProcessSelected(node.Process);
+        }
+    }
+    
 }

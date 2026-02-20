@@ -18,240 +18,305 @@
     <Grid Margin="15">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="350"/>
-        </Grid.ColumnDefinitions>
-        
         <!-- Заголовок -->
-        <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
+        <TextBlock Grid.Row="0"
                    Text="Диспетчер процессов"
                    FontSize="28"
                    FontWeight="Bold"
                    Margin="0,0,0,20"
                    Foreground="#E0E0E0"/>
         
-        <!-- Кнопки сортировки -->
-        <Border Grid.Row="1" Grid.Column="0"
-                Background="#2D2D30" 
-                CornerRadius="4"
-                Padding="15"
-                Margin="0,0,10,10">
-            <StackPanel>
-                <TextBlock Text="Сортировка:" 
-                           FontSize="14" 
-                           Foreground="#B0B0B0" 
-                           Margin="0,0,0,10"/>
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                    <Button Content="PID" Click="SortByPid_Click" Padding="20,8" Background="#3E3E42" Foreground="#E0E0E0" BorderThickness="0"/>
-                    <Button Content="Имя" Click="SortByName_Click" Padding="20,8" Background="#3E3E42" Foreground="#E0E0E0" BorderThickness="0"/>
-                    <Button Content="Память" Click="SortByMemory_Click" Padding="20,8" Background="#3E3E42" Foreground="#E0E0E0" BorderThickness="0"/>
-                    <Button Content="Приоритет" Click="SortByPriority_Click" Padding="20,8" Background="#3E3E42" Foreground="#E0E0E0" BorderThickness="0"/>
-                    <Button Content="Потоки" Click="SortByThreads_Click" Padding="20,8" Background="#3E3E42" Foreground="#E0E0E0" BorderThickness="0"/>
-                    <Button Content="CPU" Click="SortByCpuTime_Click" Padding="20,8" Background="#3E3E42" Foreground="#E0E0E0" BorderThickness="0"/>
-                </StackPanel>
-            </StackPanel>
-        </Border>
-        
-        <!-- Поиск -->
-        <Border Grid.Row="1" Grid.Column="1"
-                Background="#2D2D30" 
-                CornerRadius="4"
-                Padding="15"
-                Margin="0,0,0,10">
-            <StackPanel>
-                <TextBlock Text="Поиск процесса:" 
-                           FontSize="12" 
-                           Foreground="#B0B0B0" 
-                           Margin="0,0,0,5"/>
-                <TextBox x:Name="SearchBox"
-                         Watermark="Введите имя процесса..."
-                         Margin="0,0,0,10"
-                         TextChanged="SearchBox_TextChanged"/>
-                <Button Content="Очистить"
-                        Click="ClearSearch_Click"
-                        Padding="15,8"
-                        Background="#3E3E42"
-                        Foreground="#E0E0E0"
-                        BorderThickness="0"/>
-                <Separator Background="#3E3E42" Margin="0,15"/>
-
-                <TextBlock Text="Интервал обновления (сек):" 
-                           FontSize="12" 
-                           Foreground="#B0B0B0" 
-                           Margin="0,10,0,5"/>
-                <NumericUpDown x:Name="IntervalInput"
-                               Value="3"
-                               Minimum="1"
-                               Maximum="60"
-                               Increment="1"
-                               Margin="0,0,0,10"
-                               ValueChanged="IntervalInput_ValueChanged"/>
-            </StackPanel>
-        </Border>
-        
-        <!-- Заголовки колонок -->
-        <Border Grid.Row="2" Grid.Column="0"
-                Background="#252526" 
-                Padding="10,8"
-                Margin="0,0,10,2">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="80"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="150"/>
-                    <ColumnDefinition Width="150"/>
-                    <ColumnDefinition Width="100"/>
-                    <ColumnDefinition Width="120"/>
-                </Grid.ColumnDefinitions>
-                
-                <TextBlock Grid.Column="0" Text="PID" FontWeight="Bold" Foreground="#E0E0E0"/>
-                <TextBlock Grid.Column="1" Text="Имя процесса" FontWeight="Bold" Foreground="#E0E0E0" Margin="10,0,0,0"/>
-                <TextBlock Grid.Column="2" Text="Память" FontWeight="Bold" Foreground="#E0E0E0"/>
-                <TextBlock Grid.Column="3" Text="Приоритет" FontWeight="Bold" Foreground="#E0E0E0"/>
-                <TextBlock Grid.Column="4" Text="Потоки" FontWeight="Bold" Foreground="#E0E0E0"/>
-                <TextBlock Grid.Column="5" Text="CPU время" FontWeight="Bold" Foreground="#E0E0E0"/>
-            </Grid>
-        </Border>
-        
-        <!-- Список процессов -->
-        <Border Grid.Row="3" Grid.Column="0"
-                Background="#1E1E1E" 
-                BorderBrush="#3E3E42" 
-                BorderThickness="1"
-                Margin="0,0,10,0">
-            <ScrollViewer>
-                <StackPanel x:Name="ProcessList"/>
-            </ScrollViewer>
-        </Border>
-        
-        <!-- Панель управления процессом -->
-        <Border Grid.Row="2" Grid.Column="1" Grid.RowSpan="2"
-                Background="#2D2D30"
-                CornerRadius="4"
-                Padding="15">
-            <ScrollViewer>
-                <StackPanel>
-                    <TextBlock Text="Управление процессом" 
-                               FontSize="16" 
-                               FontWeight="Bold"
-                               Foreground="#E0E0E0" 
-                               Margin="0,0,0,15"/>
+        <!-- Вкладки -->
+        <TabControl Grid.Row="1">
+            <!-- Вкладка "Список" -->
+            <TabItem Header="Список процессов">
+                <Grid Margin="0,10,0,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
                     
-                    <TextBlock Text="Выбран процесс:" 
-                               FontSize="12" 
-                               Foreground="#B0B0B0" 
-                               Margin="0,0,0,5"/>
-                    <TextBlock x:Name="SelectedProcessInfo" 
-                               Text="Не выбран" 
-                               FontSize="14" 
-                               Foreground="#E0E0E0"
-                               Margin="0,0,0,20"/>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="350"/>
+                    </Grid.ColumnDefinitions>
                     
-                    <TextBlock Text="Изменить приоритет:" 
-                               FontSize="12" 
-                               Foreground="#B0B0B0" 
-                               Margin="0,0,0,10"/>
-                    <ComboBox x:Name="PriorityComboBox"
-                              Margin="0,0,0,10"
-                              SelectionChanged="PriorityComboBox_SelectionChanged">
-                        <ComboBoxItem Content="Idle"/>
-                        <ComboBoxItem Content="BelowNormal"/>
-                        <ComboBoxItem Content="Normal" IsSelected="True"/>
-                        <ComboBoxItem Content="AboveNormal"/>
-                        <ComboBoxItem Content="High"/>
-                        <ComboBoxItem Content="Realtime"/>
-                    </ComboBox>
+                    <!-- Кнопки сортировки и фильтрации -->
+                    <Border Grid.Row="0" Grid.Column="0"
+                            Background="#2D2D30" 
+                            CornerRadius="4"
+                            Padding="15"
+                            Margin="0,0,10,10">
+                        <StackPanel>
+                            <TextBlock Text="Сортировка:" 
+                                       FontSize="14" 
+                                       Foreground="#B0B0B0" 
+                                       Margin="0,0,0,10"/>
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Button Content="PID" Click="SortByPid_Click" Padding="20,8" Background="#3E3E42" Foreground="#E0E0E0" BorderThickness="0"/>
+                                <Button Content="Имя" Click="SortByName_Click" Padding="20,8" Background="#3E3E42" Foreground="#E0E0E0" BorderThickness="0"/>
+                                <Button Content="Память" Click="SortByMemory_Click" Padding="20,8" Background="#3E3E42" Foreground="#E0E0E0" BorderThickness="0"/>
+                                <Button Content="Приоритет" Click="SortByPriority_Click" Padding="20,8" Background="#3E3E42" Foreground="#E0E0E0" BorderThickness="0"/>
+                                <Button Content="Потоки" Click="SortByThreads_Click" Padding="20,8" Background="#3E3E42" Foreground="#E0E0E0" BorderThickness="0"/>
+                                <Button Content="CPU" Click="SortByCpuTime_Click" Padding="20,8" Background="#3E3E42" Foreground="#E0E0E0" BorderThickness="0"/>
+                            </StackPanel>
+                            
+                            <TextBlock Text="Фильтрация:" 
+                                       FontSize="14" 
+                                       Foreground="#B0B0B0" 
+                                       Margin="0,15,0,10"/>
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Button Content="Все" Click="FilterAll_Click" Padding="20,8" Background="#3E3E42" Foreground="#E0E0E0" BorderThickness="0"/>
+                                <Button Content="С GUI" Click="FilterGui_Click" Padding="20,8" Background="#3E3E42" Foreground="#E0E0E0" BorderThickness="0"/>
+                                <Button Content="Системные" Click="FilterSystem_Click" Padding="20,8" Background="#3E3E42" Foreground="#E0E0E0" BorderThickness="0"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
                     
-                    <Button Content="Применить приоритет"
-                            Click="ApplyPriority_Click"
-                            Padding="15,10"
-                            Margin="0,0,0,20"
-                            Background="#0E639C"
-                            Foreground="White"
-                            BorderThickness="0"/>
+                    <!-- Поиск и интервал -->
+                    <Border Grid.Row="0" Grid.Column="1"
+                            Background="#2D2D30" 
+                            CornerRadius="4"
+                            Padding="15"
+                            Margin="0,0,0,10">
+                        <StackPanel>
+                            <TextBlock Text="Поиск процесса:" 
+                                       FontSize="12" 
+                                       Foreground="#B0B0B0" 
+                                       Margin="0,0,0,5"/>
+                            <TextBox x:Name="SearchBox"
+                                     Watermark="Введите имя процесса..."
+                                     Margin="0,0,0,10"
+                                     TextChanged="SearchBox_TextChanged"/>
+                            <Button Content="Очистить"
+                                    Click="ClearSearch_Click"
+                                    Padding="15,8"
+                                    Background="#3E3E42"
+                                    Foreground="#E0E0E0"
+                                    BorderThickness="0"/>
+                            
+                            <Separator Background="#3E3E42" Margin="0,15"/>
+
+                            <TextBlock Text="Интервал обновления (сек):" 
+                                       FontSize="12" 
+                                       Foreground="#B0B0B0" 
+                                       Margin="0,10,0,5"/>
+                            <NumericUpDown x:Name="IntervalInput"
+                                           Value="3"
+                                           Minimum="1"
+                                           Maximum="60"
+                                           Increment="1"
+                                           Margin="0,0,0,10"
+                                           ValueChanged="IntervalInput_ValueChanged"/>
+                        </StackPanel>
+                    </Border>
                     
-                    <Separator Background="#3E3E42" Margin="0,10"/>
+                    <!-- Заголовки колонок -->
+                    <Border Grid.Row="1" Grid.Column="0"
+                            Background="#252526" 
+                            Padding="10,8"
+                            Margin="0,0,10,2">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="80"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="150"/>
+                                <ColumnDefinition Width="150"/>
+                                <ColumnDefinition Width="100"/>
+                                <ColumnDefinition Width="120"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <TextBlock Grid.Column="0" Text="PID" FontWeight="Bold" Foreground="#E0E0E0"/>
+                            <TextBlock Grid.Column="1" Text="Имя процесса" FontWeight="Bold" Foreground="#E0E0E0" Margin="10,0,0,0"/>
+                            <TextBlock Grid.Column="2" Text="Память" FontWeight="Bold" Foreground="#E0E0E0"/>
+                            <TextBlock Grid.Column="3" Text="Приоритет" FontWeight="Bold" Foreground="#E0E0E0"/>
+                            <TextBlock Grid.Column="4" Text="Потоки" FontWeight="Bold" Foreground="#E0E0E0"/>
+                            <TextBlock Grid.Column="5" Text="CPU время" FontWeight="Bold" Foreground="#E0E0E0"/>
+                        </Grid>
+                    </Border>
                     
-                    <Button Content="Завершить процесс"
-                            Click="KillProcess_Click"
-                            Padding="15,10"
-                            Margin="0,10,0,0"
-                            Background="#D13438"
-                            Foreground="White"
-                            BorderThickness="0"/>
+                    <!-- Список процессов -->
+                    <Border Grid.Row="2" Grid.Column="0"
+                            Background="#1E1E1E" 
+                            BorderBrush="#3E3E42" 
+                            BorderThickness="1"
+                            Margin="0,0,10,0">
+                        <ScrollViewer>
+                            <StackPanel x:Name="ProcessList"/>
+                        </ScrollViewer>
+                    </Border>
                     
-                    <Separator Background="#3E3E42" Margin="0,20"/>
+                    <!-- Панель управления процессом -->
+                    <Border Grid.Row="1" Grid.Column="1" Grid.RowSpan="2"
+                            Background="#2D2D30"
+                            CornerRadius="4"
+                            Padding="15">
+                        <ScrollViewer>
+                            <StackPanel>
+                                <TextBlock Text="Управление процессом" 
+                                           FontSize="16" 
+                                           FontWeight="Bold"
+                                           Foreground="#E0E0E0" 
+                                           Margin="0,0,0,15"/>
+                                
+                                <TextBlock Text="Выбран процесс:" 
+                                           FontSize="12" 
+                                           Foreground="#B0B0B0" 
+                                           Margin="0,0,0,5"/>
+                                <TextBlock x:Name="SelectedProcessInfo" 
+                                           Text="Не выбран" 
+                                           FontSize="14" 
+                                           Foreground="#E0E0E0"
+                                           Margin="0,0,0,20"/>
+                                
+                                <TextBlock Text="Изменить приоритет:" 
+                                           FontSize="12" 
+                                           Foreground="#B0B0B0" 
+                                           Margin="0,0,0,10"/>
+                                <ComboBox x:Name="PriorityComboBox"
+                                          Margin="0,0,0,10"
+                                          SelectionChanged="PriorityComboBox_SelectionChanged">
+                                    <ComboBoxItem Content="Idle"/>
+                                    <ComboBoxItem Content="BelowNormal"/>
+                                    <ComboBoxItem Content="Normal" IsSelected="True"/>
+                                    <ComboBoxItem Content="AboveNormal"/>
+                                    <ComboBoxItem Content="High"/>
+                                    <ComboBoxItem Content="Realtime"/>
+                                </ComboBox>
+                                
+                                <Button Content="Применить приоритет"
+                                        Click="ApplyPriority_Click"
+                                        Padding="15,10"
+                                        Margin="0,0,0,20"
+                                        Background="#0E639C"
+                                        Foreground="White"
+                                        BorderThickness="0"/>
+                                
+                                <Separator Background="#3E3E42" Margin="0,10"/>
+                                
+                                <Button Content="Завершить процесс"
+                                        Click="KillProcess_Click"
+                                        Padding="15,10"
+                                        Margin="0,10,0,0"
+                                        Background="#D13438"
+                                        Foreground="White"
+                                        BorderThickness="0"/>
+                                
+                                <Separator Background="#3E3E42" Margin="0,20"/>
 
-                    <TextBlock Text="CPU Affinity (процессорная привязка)" 
-                               FontSize="12" 
-                               FontWeight="Bold"
-                               Foreground="#B0B0B0" 
-                               Margin="0,10,0,10"/>
+                                <TextBlock Text="CPU Affinity (процессорная привязка)" 
+                                           FontSize="12" 
+                                           FontWeight="Bold"
+                                           Foreground="#B0B0B0" 
+                                           Margin="0,10,0,10"/>
 
-                    <TextBlock x:Name="AffinityInfo" 
-                               Text="Не выбран процесс" 
-                               FontSize="11" 
-                               Foreground="#E0E0E0"
-                               TextWrapping="Wrap"
-                               Margin="0,0,0,10"/>
+                                <TextBlock x:Name="AffinityInfo" 
+                                           Text="Не выбран процесс" 
+                                           FontSize="11" 
+                                           Foreground="#E0E0E0"
+                                           TextWrapping="Wrap"
+                                           Margin="0,0,0,10"/>
 
-                    <ScrollViewer MaxHeight="150" Margin="0,0,0,10">
-                        <StackPanel x:Name="CoreCheckboxes" Spacing="5"/>
-                    </ScrollViewer>
+                                <ScrollViewer MaxHeight="150" Margin="0,0,0,10">
+                                    <StackPanel x:Name="CoreCheckboxes" Spacing="5"/>
+                                </ScrollViewer>
 
-                    <Button Content="Применить CPU Affinity"
-                            Click="ApplyCpuAffinity_Click"
-                            Padding="15,10"
-                            Background="#0E639C"
-                            Foreground="White"
-                            BorderThickness="0"/>
+                                <Button Content="Применить CPU Affinity"
+                                        Click="ApplyCpuAffinity_Click"
+                                        Padding="15,10"
+                                        Background="#0E639C"
+                                        Foreground="White"
+                                        BorderThickness="0"/>
+                                
+                                <Separator Background="#3E3E42" Margin="0,20"/>
+
+                                <TextBlock Text="Потоки процесса" 
+                                           FontSize="12" 
+                                           FontWeight="Bold"
+                                           Foreground="#B0B0B0" 
+                                           Margin="0,10,0,10"/>
+
+                                <TextBlock x:Name="ThreadsCount" 
+                                           Text="Не выбран процесс" 
+                                           FontSize="11" 
+                                           Foreground="#E0E0E0"
+                                           Margin="0,0,0,10"/>
+
+                                <ScrollViewer MaxHeight="200">
+                                    <StackPanel x:Name="ThreadsList" Spacing="5"/>
+                                </ScrollViewer>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Border>
                     
-                    <Separator Background="#3E3E42" Margin="0,20"/>
-
-                    <TextBlock Text="Потоки процесса" 
-                               FontSize="12" 
-                               FontWeight="Bold"
-                               Foreground="#B0B0B0" 
-                               Margin="0,10,0,10"/>
-
-                    <TextBlock x:Name="ThreadsCount" 
-                               Text="Не выбран процесс" 
-                               FontSize="11" 
-                               Foreground="#E0E0E0"
-                               Margin="0,0,0,10"/>
-
-                    <ScrollViewer MaxHeight="200">
-                        <StackPanel x:Name="ThreadsList" Spacing="5"/>
-                    </ScrollViewer>
-                </StackPanel>
-            </ScrollViewer>
-        </Border>
-        
-        <!-- Кнопка обновления -->
-        <StackPanel Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2"
-                    Orientation="Horizontal" 
-                    HorizontalAlignment="Right"
-                    Margin="0,15,0,0"
-                    Spacing="10">
-            <TextBlock x:Name="ProcessCount" 
-                       Text="Процессов: 0" 
-                       VerticalAlignment="Center"
-                       Foreground="#B0B0B0"
-                       Margin="0,0,15,0"/>
-            <Button Content="Обновить"
-                    Click="RefreshButton_Click"
-                    Padding="25,10"
-                    FontSize="14"
-                    Background="#0E639C"
-                    Foreground="White"
-                    BorderThickness="0"/>
-        </StackPanel>
+                    <!-- Кнопка обновления -->
+                    <StackPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
+                                Orientation="Horizontal" 
+                                HorizontalAlignment="Right"
+                                Margin="0,15,0,0"
+                                Spacing="10">
+                        <TextBlock x:Name="ProcessCount" 
+                                   Text="Процессов: 0" 
+                                   VerticalAlignment="Center"
+                                   Foreground="#B0B0B0"
+                                   Margin="0,0,15,0"/>
+                        <Button Content="Обновить"
+                                Click="RefreshButton_Click"
+                                Padding="25,10"
+                                FontSize="14"
+                                Background="#0E639C"
+                                Foreground="White"
+                                BorderThickness="0"/>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+            
+            <!-- Вкладка "Дерево" -->
+            <TabItem Header="Иерархия процессов">
+                <Grid Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="10" Margin="0,0,0,10">
+                        <Button Content="Построить дерево"
+                                Click="BuildTree_Click"
+                                Padding="20,10"
+                                Background="#0E639C"
+                                Foreground="White"
+                                BorderThickness="0"/>
+                        <TextBlock x:Name="TreeInfo"
+                                   Text="Нажмите 'Построить дерево'"
+                                   VerticalAlignment="Center"
+                                   Foreground="#B0B0B0"/>
+                    </StackPanel>
+                    
+                    <Border Grid.Row="1"
+                            Background="#2D2D30"
+                            CornerRadius="4"
+                            Padding="10">
+                        <ScrollViewer>
+                            <TreeView x:Name="ProcessTreeView"
+                                      Background="Transparent"
+                                      SelectionChanged="ProcessTreeView_SelectionChanged">
+                                <TreeView.ItemTemplate>
+                                    <TreeDataTemplate ItemsSource="{Binding Children}">
+                                        <TextBlock Text="{Binding DisplayText}" 
+                                                   Foreground="White"
+                                                   Padding="5"/>
+                                    </TreeDataTemplate>
+                                </TreeView.ItemTemplate>
+                            </TreeView>
+                        </ScrollViewer>
+                    </Border>
+                </Grid>
+            </TabItem>
+        </TabControl>
     </Grid>
 </Window>

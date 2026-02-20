@@ -118,4 +118,40 @@ public class ProcessService
         
         return threadList;
     }
+    
+    public int GetParentProcessId(int processId)
+    {
+        try
+        {
+            Process process = Process.GetProcessById(processId);
+        
+            // Используем WMI для получения родительского процесса (работает и на Linux через /proc)
+            ProcessStartInfo startInfo = new ProcessStartInfo
+            {
+                FileName = "ps",
+                Arguments = $"-o ppid= -p {processId}",
+                RedirectStandardOutput = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+        
+            using (Process proc = Process.Start(startInfo))
+            {
+                if (proc != null)
+                {
+                    string output = proc.StandardOutput.ReadToEnd().Trim();
+                    if (int.TryParse(output, out int parentId))
+                    {
+                        return parentId;
+                    }
+                }
+            }
+        }
+        catch
+        {
+        }
+    
+        return 0;
+    }
+    
 }

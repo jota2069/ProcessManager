@@ -4,22 +4,27 @@ using Avalonia.Threading;
 using ProcessManager.ViewModels;
 using ProcessManager.Models;
 using ProcessManager.Helpers;
+using ProcessManager.Services;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace ProcessManager.Views;
 
 public partial class MainWindow : Window
 {
     private readonly MainWindowViewModel _viewModel;
-    private readonly ProcessSorter _sorter;
-    private DispatcherTimer _timer;
+    private readonly ProcessController _processController;
+    private readonly ProcessHelper _helper;
+    private DispatcherTimer? _timer;
+    private ProcessInfo? _selectedProcess;
 
     public MainWindow()
     {
         InitializeComponent();
         _viewModel = new MainWindowViewModel();
-        _sorter = new ProcessSorter();
+        _processController = new ProcessController();
+        _helper = new ProcessHelper();
         DisplayProcesses(_viewModel.Processes);
         
         StartAutoRefresh();
@@ -28,48 +33,129 @@ public partial class MainWindow : Window
     private void StartAutoRefresh()
     {
         _timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(3) };
-        _timer.Tick += (sender, args) =>
-        {
-            _viewModel.LoadProcesses();
-            DisplayProcesses(_sorter.ApplySort(_viewModel.Processes));
-        };
+        _timer.Tick += (s, e) => RefreshProcessList();
         _timer.Start();
     }
 
-    private void RefreshButton_Click(object? sender, RoutedEventArgs e)
+    private void RefreshProcessList()
     {
         _viewModel.LoadProcesses();
-        DisplayProcesses(_sorter.ApplySort(_viewModel.Processes));
+        IEnumerable<ProcessInfo> filtered = _helper.ApplyFilters(_viewModel.Processes, SearchBox.Text ?? "");
+        DisplayProcesses(_helper.ApplySort(filtered));
     }
+
+    private void RefreshButton_Click(object? sender, RoutedEventArgs e) => RefreshProcessList();
     
     private void SortByPid_Click(object? sender, RoutedEventArgs e)
     {
-        _sorter.ToggleSortDirection("pid");
-        DisplayProcesses(_sorter.ApplySort(_viewModel.Processes));
+        _helper.ToggleSortDirection("pid");
+        RefreshProcessList();
     }
 
     private void SortByName_Click(object? sender, RoutedEventArgs e)
     {
-        _sorter.ToggleSortDirection("name");
-        DisplayProcesses(_sorter.ApplySort(_viewModel.Processes));
+        _helper.ToggleSortDirection("name");
+        RefreshProcessList();
     }
 
     private void SortByMemory_Click(object? sender, RoutedEventArgs e)
     {
-        _sorter.ToggleSortDirection("memory");
-        DisplayProcesses(_sorter.ApplySort(_viewModel.Processes));
+        _helper.ToggleSortDirection("memory");
+        RefreshProcessList();
     }
 
     private void SortByPriority_Click(object? sender, RoutedEventArgs e)
     {
-        _sorter.ToggleSortDirection("priority");
-        DisplayProcesses(_sorter.ApplySort(_viewModel.Processes));
+        _helper.ToggleSortDirection("priority");
+        RefreshProcessList();
     }
 
     private void SortByThreads_Click(object? sender, RoutedEventArgs e)
     {
-        _sorter.ToggleSortDirection("threads");
-        DisplayProcesses(_sorter.ApplySort(_viewModel.Processes));
+        _helper.ToggleSortDirection("threads");
+        RefreshProcessList();
+    }
+
+    private void SortByCpuTime_Click(object? sender, RoutedEventArgs e)
+    {
+        _helper.ToggleSortDirection("cputime");
+        RefreshProcessList();
+    }
+
+    private void SearchBox_TextChanged(object? sender, TextChangedEventArgs e) => RefreshProcessList();
+
+    private void ClearSearch_Click(object? sender, RoutedEventArgs e)
+    {
+        SearchBox.Text = "";
+    }
+
+    private void IntervalInput_ValueChanged(object? sender, NumericUpDownValueChangedEventArgs e)
+    {
+        if (_timer == null) return;
+    
+        decimal? value = IntervalInput.Value;
+        double seconds = value.HasValue ? (double)value.Value : 3.0;
+    
+        _timer.Stop();
+        _timer.Interval = TimeSpan.FromSeconds(seconds);
+        _timer.Start();
+    
+        Console.WriteLine($"Интервал обновления изменён на {seconds} сек");
+    }
+
+    private void FilterAll_Click(object? sender, RoutedEventArgs e)
+    {
+        _helper.SetFilter("all");
+        RefreshProcessList();
+    }
+
+    private void FilterGui_Click(object? sender, RoutedEventArgs e)
+    {
+        _helper.SetFilter("gui");
+        RefreshProcessList();
+    }
+
+    private void FilterSystem_Click(object? sender, RoutedEventArgs e)
+    {
+        _helper.SetFilter("system");
+        RefreshProcessList();
+    }
+
+    private void PriorityComboBox_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+    }
+
+    private void ApplyPriority_Click(object? sender, RoutedEventArgs e)
+    {
+        if (_selectedProcess == null) return;
+
+        ComboBoxItem? selected = PriorityComboBox.SelectedItem as ComboBoxItem;
+        if (selected == null) return;
+
+        ProcessPriorityClass priority = _processController.ParsePriority(selected.Content?.ToString() ?? "Normal");
+        
+        if (_processController.SetPriority(_selectedProcess, priority))
+        {
+            RefreshProcessList();
+        }
+    }
+
+    private void KillProcess_Click(object? sender, RoutedEventArgs e)
+    {
+        if (_selectedProcess == null) return;
+
+        if (_processController.KillProcess(_selectedProcess))
+        {
+            _selectedProcess = null;
+            SelectedProcessInfo.Text = "Не выбран";
+            RefreshProcessList();
+        }
+    }
+
+    private void ApplyCpuAffinity_Click(object? sender, RoutedEventArgs e)
+    {
+        if (_selectedProcess == null) return;
+        _helper.ApplyAffinity(_selectedProcess, CoreCheckboxes);
     }
 
     private void DisplayProcesses(IEnumerable<ProcessInfo> processes)
@@ -78,9 +164,17 @@ public partial class MainWindow : Window
 
         foreach (ProcessInfo process in processes)
         {
-            ProcessList.Children.Add(ProcessRowBuilder.CreateProcessRow(process));
+            ProcessList.Children.Add(_helper.CreateProcessRow(process, OnProcessSelected));
         }
 
         ProcessCount.Text = $"Процессов: {_viewModel.Processes.Count}";
+    }
+
+    private void OnProcessSelected(ProcessInfo process)
+    {
+        _selectedProcess = process;
+        SelectedProcessInfo.Text = $"{process.Name} (PID: {process.Id})";
+        _helper.UpdateAffinityUI(process, AffinityInfo, CoreCheckboxes);
+        _helper.UpdateThreadsUI(process, ThreadsCount, ThreadsList);
     }
 }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using ProcessManager.Models;
 using ProcessManager.Services;
 
@@ -33,30 +32,5 @@ public partial class MainWindowViewModel : ViewModelBase
         }
     
         Console.WriteLine($"В коллекции процессов: {Processes.Count}");
-    }
-
-    public List<ProcessInfo> SortByPid()
-    {
-        return Processes.OrderByDescending(p => p.Id).ToList();
-    }
-
-    public List<ProcessInfo> SortByName()
-    {
-        return Processes.OrderByDescending(p => p.Name).ToList();
-    }
-
-    public List<ProcessInfo> SortByMemory()
-    {
-        return Processes.OrderByDescending(p => p.MemoryUsage).ToList();
-    }
-
-    public List<ProcessInfo> SortByPriority()
-    {
-        return Processes.OrderByDescending(p => p.Priority).ToList();
-    }
-
-    public List<ProcessInfo> SortByThreads()
-    {
-        return Processes.OrderByDescending(p => p.ThreadCount).ToList();
     }
 }

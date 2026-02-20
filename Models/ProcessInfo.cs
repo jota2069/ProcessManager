@@ -12,7 +12,7 @@ public class ProcessInfo
     public int ThreadCount { get; set; }
     public TimeSpan CpuTime { get; set; }
 
-    public string MemoryUsageMb => $"{MemoryUsage / 1024 / 1024} MB";
+    public string MemoryUsageMb => $"{MemoryUsage / 1024 / 1024} MB";   
     
     public override string ToString()
     {

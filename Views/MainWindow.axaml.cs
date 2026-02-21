@@ -9,7 +9,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Collections.ObjectModel;
 
 namespace ProcessManager.Views;
 
@@ -24,11 +23,15 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+
         _viewModel = new MainWindowViewModel();
+        DataContext = _viewModel;
+
         _processController = new ProcessController();
         _helper = new ProcessHelper();
+
+        // Только после инициализации VM можно работать с её данными
         DisplayProcesses(_viewModel.Processes);
-        
         StartAutoRefresh();
     }
 
@@ -80,7 +83,7 @@ public partial class MainWindow : Window
 
     private void SortByCpuTime_Click(object? sender, RoutedEventArgs e)
     {
-        _helper.ToggleSortDirection("cputime");
+        _helper.ToggleSortDirection("cpu");
         RefreshProcessList();
     }
 
@@ -176,8 +179,9 @@ public partial class MainWindow : Window
     {
         _selectedProcess = process;
         SelectedProcessInfo.Text = $"{process.Name} (PID: {process.Id})";
-        _helper.UpdateAffinityUI(process, AffinityInfo, CoreCheckboxes);
-        _helper.UpdateThreadsUI(process, ThreadsCount, ThreadsList);
+    
+        _helper.UpdateAffinityUi(process, AffinityInfo, CoreCheckboxes);
+        _helper.UpdateThreadsUi(process, ThreadsCount, ThreadsList);
     }
     
     private void BuildTree_Click(object? sender, RoutedEventArgs e)
@@ -194,5 +198,14 @@ public partial class MainWindow : Window
             OnProcessSelected(node.Process);
         }
     }
+    
+    private void UpdateCharts_Click(object? sender, RoutedEventArgs e)
+    {
+        _viewModel.LoadProcesses();
+        CpuChartContainer.Child = _helper.BuildCpuChart();
+        MemoryChartContainer.Child = _helper.BuildMemoryChart(_viewModel.Processes.ToList());
+    }
+    
+    
     
 }

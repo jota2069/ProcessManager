@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "G4AbJjRWFxM=",
+  "dgSpecHash": "3x/5Lew+q04=",
   "success": true,
   "projectFilePath": "/home/amin/ProcessManager/ProcessManager.csproj",
   "expectedPackageFiles": [
@@ -27,8 +27,12 @@
     "/home/amin/.nuget/packages/harfbuzzsharp.nativeassets.webassembly/8.3.1.1/harfbuzzsharp.nativeassets.webassembly.8.3.1.1.nupkg.sha512",
     "/home/amin/.nuget/packages/harfbuzzsharp.nativeassets.win32/8.3.1.1/harfbuzzsharp.nativeassets.win32.8.3.1.1.nupkg.sha512",
     "/home/amin/.nuget/packages/microcom.runtime/0.11.0/microcom.runtime.0.11.0.nupkg.sha512",
+    "/home/amin/.nuget/packages/scottplot/5.0.56/scottplot.5.0.56.nupkg.sha512",
+    "/home/amin/.nuget/packages/scottplot.avalonia/5.0.56/scottplot.avalonia.5.0.56.nupkg.sha512",
     "/home/amin/.nuget/packages/skiasharp/2.88.9/skiasharp.2.88.9.nupkg.sha512",
+    "/home/amin/.nuget/packages/skiasharp.harfbuzz/2.88.9/skiasharp.harfbuzz.2.88.9.nupkg.sha512",
     "/home/amin/.nuget/packages/skiasharp.nativeassets.linux/2.88.9/skiasharp.nativeassets.linux.2.88.9.nupkg.sha512",
+    "/home/amin/.nuget/packages/skiasharp.nativeassets.linux.nodependencies/2.88.9/skiasharp.nativeassets.linux.nodependencies.2.88.9.nupkg.sha512",
     "/home/amin/.nuget/packages/skiasharp.nativeassets.macos/2.88.9/skiasharp.nativeassets.macos.2.88.9.nupkg.sha512",
     "/home/amin/.nuget/packages/skiasharp.nativeassets.webassembly/2.88.9/skiasharp.nativeassets.webassembly.2.88.9.nupkg.sha512",
     "/home/amin/.nuget/packages/skiasharp.nativeassets.win32/2.88.9/skiasharp.nativeassets.win32.2.88.9.nupkg.sha512",

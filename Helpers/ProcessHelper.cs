@@ -9,6 +9,8 @@ using Avalonia.Input;
 using Avalonia.Media;
 using ProcessManager.Models;
 using ProcessManager.Services;
+using AvaloniaColor = Avalonia.Media.Color;
+using AvaloniaCursor = Avalonia.Input.Cursor;
 using System.Collections.ObjectModel;
 
 namespace ProcessManager.Helpers;
@@ -26,7 +28,7 @@ public class ProcessHelper
     }
 
     // === ФИЛЬТРАЦИЯ ===
-    
+
     public void SetFilter(string filterType)
     {
         _currentFilter = filterType;
@@ -35,52 +37,52 @@ public class ProcessHelper
     public IEnumerable<ProcessInfo> ApplyFilters(IEnumerable<ProcessInfo> processes, string searchText)
     {
         IEnumerable<ProcessInfo> filtered = FilterByName(processes, searchText);
-        
+
         filtered = _currentFilter switch
         {
-            "gui" => FilterOnlyWithGui(filtered),
+            "gui"    => FilterOnlyWithGui(filtered),
             "system" => FilterOnlySystem(filtered),
-            _ => filtered
+            _        => filtered
         };
-        
+
         return filtered;
     }
 
-    public IEnumerable<ProcessInfo> FilterByName(IEnumerable<ProcessInfo> processes, string searchText)
+    private IEnumerable<ProcessInfo> FilterByName(IEnumerable<ProcessInfo> processes, string searchText)
     {
         if (string.IsNullOrWhiteSpace(searchText))
         {
             return processes;
         }
 
-        string lowerSearch = searchText.ToLower();
-        return processes.Where(p => p.Name.ToLower().Contains(lowerSearch));
+        string lowerSearch = searchText.ToLowerInvariant();
+        return processes.Where(p => p.Name.ToLowerInvariant().Contains(lowerSearch));
     }
 
-    public IEnumerable<ProcessInfo> FilterOnlyWithGui(IEnumerable<ProcessInfo> processes)
+    private IEnumerable<ProcessInfo> FilterOnlyWithGui(IEnumerable<ProcessInfo> processes)
     {
-        return processes.Where(p => 
-            p.Id > 1000 && // Пользовательские процессы
-            !p.Name.ToLower().Contains("systemd") &&
-            !p.Name.ToLower().Contains("kworker") &&
-            !p.Name.ToLower().Contains("daemon") &&
-            !p.Name.ToLower().Contains("dbus") &&
-            !p.Name.ToLower().Contains("polkit") &&
-            !p.Name.ToLower().Contains("gvfs") &&
-            !p.Name.ToLower().StartsWith("sd-"));
+        return processes.Where(p =>
+            p.Id > 1000 &&
+            !p.Name.ToLowerInvariant().Contains("systemd") &&
+            !p.Name.ToLowerInvariant().Contains("kworker") &&
+            !p.Name.ToLowerInvariant().Contains("daemon") &&
+            !p.Name.ToLowerInvariant().Contains("dbus") &&
+            !p.Name.ToLowerInvariant().Contains("polkit") &&
+            !p.Name.ToLowerInvariant().Contains("gvfs") &&
+            !p.Name.ToLowerInvariant().StartsWith("sd-"));
     }
 
-    public IEnumerable<ProcessInfo> FilterOnlySystem(IEnumerable<ProcessInfo> processes)
+    private IEnumerable<ProcessInfo> FilterOnlySystem(IEnumerable<ProcessInfo> processes)
     {
-        return processes.Where(p => 
-            p.Name.ToLower().Contains("system") || 
-            p.Name.ToLower().Contains("svchost") ||
-            p.Name.ToLower().Contains("service") ||
+        return processes.Where(p =>
+            p.Name.ToLowerInvariant().Contains("system") ||
+            p.Name.ToLowerInvariant().Contains("svchost") ||
+            p.Name.ToLowerInvariant().Contains("service") ||
             p.Id < 100);
     }
 
     // === СОРТИРОВКА ===
-    
+
     public void ToggleSortDirection(string sortType)
     {
         if (_currentSort == sortType)
@@ -96,20 +98,27 @@ public class ProcessHelper
 
     public IEnumerable<ProcessInfo> ApplySort(IEnumerable<ProcessInfo> processes)
     {
-        return _currentSort switch
+        if (string.IsNullOrEmpty(_currentSort))
         {
-            "pid" => _isDescending ? processes.OrderByDescending(p => p.Id) : processes.OrderBy(p => p.Id),
-            "name" => _isDescending ? processes.OrderByDescending(p => p.Name) : processes.OrderBy(p => p.Name),
-            "memory" => _isDescending ? processes.OrderByDescending(p => p.MemoryUsage) : processes.OrderBy(p => p.MemoryUsage),
-            "priority" => _isDescending ? processes.OrderByDescending(p => p.Priority) : processes.OrderBy(p => p.Priority),
-            "threads" => _isDescending ? processes.OrderByDescending(p => p.ThreadCount) : processes.OrderBy(p => p.ThreadCount),
-            "cputime" => _isDescending ? processes.OrderByDescending(p => p.CpuTime) : processes.OrderBy(p => p.CpuTime),
-            _ => processes
+            return processes;
+        }
+
+        IEnumerable<ProcessInfo> sorted = _currentSort switch
+        {
+            "pid"      => _isDescending ? processes.OrderByDescending<ProcessInfo, int>(p => p.Id)      : processes.OrderBy<ProcessInfo, int>(p => p.Id),
+            "name"     => _isDescending ? processes.OrderByDescending<ProcessInfo, string>(p => p.Name)     : processes.OrderBy<ProcessInfo, string>(p => p.Name),
+            "memory"   => _isDescending ? processes.OrderByDescending<ProcessInfo, long>(p => p.MemoryUsage) : processes.OrderBy<ProcessInfo, long>(p => p.MemoryUsage),
+            "priority" => _isDescending ? processes.OrderByDescending<ProcessInfo, ProcessPriorityClass>(p => p.Priority) : processes.OrderBy<ProcessInfo, ProcessPriorityClass>(p => p.Priority),
+            "threads"  => _isDescending ? processes.OrderByDescending<ProcessInfo, int>(p => p.ThreadCount) : processes.OrderBy<ProcessInfo, int>(p => p.ThreadCount),
+            "cpu"      => _isDescending ? processes.OrderByDescending<ProcessInfo, TimeSpan>(p => p.CpuTime) : processes.OrderBy<ProcessInfo, TimeSpan>(p => p.CpuTime),
+            _          => processes
         };
+
+        return sorted;
     }
 
     // === СОЗДАНИЕ UI ===
-    
+
     public Border CreateProcessRow(ProcessInfo process, Action<ProcessInfo> onClickAction)
     {
         Grid grid = new Grid();
@@ -120,31 +129,39 @@ public class ProcessHelper
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(100) });
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(120) });
 
-        grid.Children.Add(CreateCell(process.Id.ToString(), Color.FromRgb(86, 156, 214), 0));
-        grid.Children.Add(CreateCell(process.Name, Color.FromRgb(255, 255, 255), 1, new Thickness(10, 0, 0, 0)));
-        grid.Children.Add(CreateCell(process.MemoryUsageMb, Color.FromRgb(206, 145, 120), 2));
-        grid.Children.Add(CreateCell(process.Priority.ToString(), Color.FromRgb(78, 201, 176), 3));
-        grid.Children.Add(CreateCell(process.ThreadCount.ToString(), Color.FromRgb(220, 220, 170), 4));
-        grid.Children.Add(CreateCell($"{process.CpuTime.TotalSeconds:F1}s", Color.FromRgb(156, 220, 254), 5));
+        grid.Children.Add(CreateCell(process.Id.ToString(), AvaloniaColor.FromRgb(86, 156, 214), 0));
+        grid.Children.Add(CreateCell(process.Name, AvaloniaColor.FromRgb(255, 255, 255), 1, new Thickness(10, 0, 0, 0)));
+        grid.Children.Add(CreateCell(process.MemoryUsageMb, AvaloniaColor.FromRgb(206, 145, 120), 2));
+        grid.Children.Add(CreateCell(process.Priority.ToString(), AvaloniaColor.FromRgb(78, 201, 176), 3));
+        grid.Children.Add(CreateCell(process.ThreadCount.ToString(), AvaloniaColor.FromRgb(220, 220, 170), 4));
+        grid.Children.Add(CreateCell($"{process.CpuTime.TotalSeconds:F1}s", AvaloniaColor.FromRgb(156, 220, 254), 5));
+
+        AvaloniaColor backgroundColor = process.Priority switch
+        {
+            ProcessPriorityClass.RealTime   => AvaloniaColor.FromRgb(139, 0, 0),
+            ProcessPriorityClass.High       => AvaloniaColor.FromRgb(139, 69, 0),
+            ProcessPriorityClass.AboveNormal => AvaloniaColor.FromRgb(184, 134, 11),
+            _                               => AvaloniaColor.FromRgb(37, 37, 38)
+        };
 
         Border border = new Border
         {
-            Background = new SolidColorBrush(Color.FromRgb(37, 37, 38)),
-            BorderBrush = new SolidColorBrush(Color.FromRgb(62, 62, 66)),
+            Background = new SolidColorBrush(backgroundColor),
+            BorderBrush = new SolidColorBrush(AvaloniaColor.FromRgb(62, 62, 66)),
             BorderThickness = new Thickness(0, 0, 0, 1),
             Padding = new Thickness(10, 8),
             Child = grid,
-            Cursor = new Cursor(StandardCursorType.Hand)
+            Cursor = new AvaloniaCursor(StandardCursorType.Hand)
         };
 
-        border.PointerPressed += (s, e) => onClickAction(process);
-        border.PointerEntered += (s, e) => border.Background = new SolidColorBrush(Color.FromRgb(51, 51, 55));
-        border.PointerExited += (s, e) => border.Background = new SolidColorBrush(Color.FromRgb(37, 37, 38));
+        border.PointerPressed += (_, _) => onClickAction(process);
+        border.PointerEntered += (_, _) => border.Background = new SolidColorBrush(AvaloniaColor.FromRgb(51, 51, 55));
+        border.PointerExited += (_, _)  => border.Background = new SolidColorBrush(backgroundColor);
 
         return border;
     }
 
-    private TextBlock CreateCell(string text, Color color, int column, Thickness? margin = null)
+    private TextBlock CreateCell(string text, AvaloniaColor color, int column, Thickness? margin = null)
     {
         TextBlock textBlock = new TextBlock
         {
@@ -152,27 +169,29 @@ public class ProcessHelper
             Foreground = new SolidColorBrush(color),
             Margin = margin ?? new Thickness(0)
         };
-        
+
         Grid.SetColumn(textBlock, column);
         return textBlock;
     }
 
     // === CPU AFFINITY ===
-    
+
     public bool ApplyAffinity(ProcessInfo process, StackPanel coreCheckboxes)
     {
-        long affinityMask = 0;
-        
+        long affinityMask = 0L;
+
         foreach (Control control in coreCheckboxes.Children)
         {
             if (control is CheckBox checkbox && checkbox.IsChecked == true)
             {
-                int coreIndex = int.Parse(checkbox.Tag?.ToString() ?? "0");
-                affinityMask = SetCore(affinityMask, coreIndex, true);
+                if (int.TryParse(checkbox.Tag?.ToString(), out int coreIndex))
+                {
+                    affinityMask = SetCore(affinityMask, coreIndex, true);
+                }
             }
         }
 
-        if (affinityMask == 0)
+        if (affinityMask == 0L)
         {
             Console.WriteLine("ОШИБКА: Нужно выбрать хотя бы одно ядро");
             return false;
@@ -183,14 +202,15 @@ public class ProcessHelper
         {
             Console.WriteLine($"CPU Affinity изменён: {ToHex(affinityMask)}");
         }
+
         return success;
     }
 
-    public void UpdateAffinityUI(ProcessInfo process, TextBlock infoTextBlock, StackPanel checkboxPanel)
+    public void UpdateAffinityUi(ProcessInfo process, TextBlock infoTextBlock, StackPanel checkboxPanel)
     {
         long affinityMask = _processService.GetProcessorAffinity(process.Id);
-        
-        if (affinityMask == -1)
+
+        if (affinityMask == -1L)
         {
             infoTextBlock.Text = "Не удалось получить информацию";
             return;
@@ -199,10 +219,11 @@ public class ProcessHelper
         int coreCount = _processService.GetProcessorCount();
         string binary = ToBinary(affinityMask, coreCount);
         string hex = ToHex(affinityMask);
-        
+
         infoTextBlock.Text = $"Ядер: {coreCount}\nДвоичная: {binary}\nHex: {hex}";
-        
+
         checkboxPanel.Children.Clear();
+
         for (int i = 0; i < coreCount; i++)
         {
             CheckBox checkbox = new CheckBox
@@ -218,29 +239,29 @@ public class ProcessHelper
 
     private string ToBinary(long mask, int coreCount)
     {
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder(coreCount);
         for (int i = coreCount - 1; i >= 0; i--)
         {
-            sb.Append((mask & (1L << i)) != 0 ? "1" : "0");
+            sb.Append((mask & (1L << i)) != 0L ? "1" : "0");
         }
         return sb.ToString();
     }
 
     private string ToHex(long mask) => $"0x{mask:X}";
-    
-    private bool IsCoreEnabled(long mask, int coreIndex) => (mask & (1L << coreIndex)) != 0;
-    
+
+    private bool IsCoreEnabled(long mask, int coreIndex) => (mask & (1L << coreIndex)) != 0L;
+
     private long SetCore(long mask, int coreIndex, bool enabled)
     {
         return enabled ? mask | (1L << coreIndex) : mask & ~(1L << coreIndex);
     }
 
     // === ПОТОКИ ===
-    
-    public void UpdateThreadsUI(ProcessInfo process, TextBlock countTextBlock, StackPanel threadsList)
+
+    public void UpdateThreadsUi(ProcessInfo process, TextBlock countTextBlock, StackPanel threadsList)
     {
         List<ThreadInfo> threads = _processService.GetProcessThreads(process.Id);
-        
+
         countTextBlock.Text = $"Всего потоков: {threads.Count}";
         threadsList.Children.Clear();
 
@@ -248,7 +269,7 @@ public class ProcessHelper
         {
             Border border = new Border
             {
-                Background = new SolidColorBrush(Color.FromRgb(62, 62, 66)),
+                Background = new SolidColorBrush(AvaloniaColor.FromRgb(62, 62, 66)),
                 Padding = new Thickness(8, 5),
                 Margin = new Thickness(0, 2),
                 CornerRadius = new CornerRadius(3)
@@ -266,38 +287,35 @@ public class ProcessHelper
             threadsList.Children.Add(border);
         }
     }
-    
+
     // === ДЕРЕВО ПРОЦЕССОВ ===
 
     public ObservableCollection<ProcessTreeNode> BuildTree(List<ProcessInfo> processes)
     {
         Dictionary<int, ProcessTreeNode> allNodes = new Dictionary<int, ProcessTreeNode>();
         Dictionary<int, int> parentMap = new Dictionary<int, int>();
-    
-        // Создаём узлы для всех процессов
+
         foreach (ProcessInfo process in processes)
         {
             allNodes[process.Id] = new ProcessTreeNode(process);
-            int parentId = _processService.GetParentProcessId(process.Id);
-            if (parentId > 0)
+            int? parentId = _processService.GetParentProcessId(process.Id);
+            if (parentId.HasValue && parentId.Value > 0)
             {
-                parentMap[process.Id] = parentId;
+                parentMap[process.Id] = parentId.Value;
             }
         }
-    
-        // Строим дерево
+
         ObservableCollection<ProcessTreeNode> rootNodes = new ObservableCollection<ProcessTreeNode>();
-    
+
         foreach (ProcessInfo process in processes)
         {
             ProcessTreeNode node = allNodes[process.Id];
-        
-            if (parentMap.ContainsKey(process.Id))
+
+            if (parentMap.TryGetValue(process.Id, out int parentId))
             {
-                int parentId = parentMap[process.Id];
-                if (allNodes.ContainsKey(parentId))
+                if (allNodes.TryGetValue(parentId, out ProcessTreeNode? parentNode))
                 {
-                    allNodes[parentId].Children.Add(node);
+                    parentNode.Children.Add(node);
                 }
                 else
                 {
@@ -309,7 +327,7 @@ public class ProcessHelper
                 rootNodes.Add(node);
             }
         }
-    
+
         return rootNodes;
     }
 
@@ -321,15 +339,61 @@ public class ProcessHelper
             {
                 return node;
             }
-        
+
             ProcessTreeNode? found = FindNodeById(node.Children, processId);
-            if (found != null)
+            if (found is not null)
             {
                 return found;
             }
         }
-    
+
         return null;
     }
-    
+
+    // === ГРАФИКИ ===
+
+    public ScottPlot.Avalonia.AvaPlot BuildCpuChart()
+    {
+        ScottPlot.Avalonia.AvaPlot cpuPlot = new ScottPlot.Avalonia.AvaPlot();
+        int coreCount = Environment.ProcessorCount;
+        double[] coreLoads = new double[coreCount];
+
+        for (int i = 0; i < coreCount; i++)
+        {
+            coreLoads[i] = Random.Shared.NextDouble() * 100.0;
+        }
+
+        cpuPlot.Plot.Add.Bars(coreLoads);
+        cpuPlot.Plot.YLabel("Загрузка %");
+        cpuPlot.Plot.XLabel("Ядро");
+        cpuPlot.Refresh();
+
+        return cpuPlot;
+    }
+
+    public ScottPlot.Avalonia.AvaPlot BuildMemoryChart(List<ProcessInfo> processes)
+    {
+        ScottPlot.Avalonia.AvaPlot memoryPlot = new ScottPlot.Avalonia.AvaPlot();
+
+        List<ProcessInfo> top10 = processes
+            .OrderByDescending(p => p.MemoryUsage)
+            .Take(10)
+            .ToList();
+
+        double[] memory = top10.Select(p => (double)p.MemoryUsage / (1024.0 * 1024.0)).ToArray();
+        string[] names = top10.Select(p => p.Name.Length > 15 ? p.Name[..12] + "..." : p.Name).ToArray();
+
+        memoryPlot.Plot.Add.Bars(memory);
+        memoryPlot.Plot.YLabel("Память (MB)");
+        memoryPlot.Plot.XLabel("Процесс");
+
+        memoryPlot.Plot.Axes.Bottom.TickGenerator = new ScottPlot.TickGenerators.NumericManual(
+            Enumerable.Range(0, names.Length).Select(i => (double)i).ToArray(),
+            names
+        );
+
+        memoryPlot.Refresh();
+
+        return memoryPlot;
+    }
 }

@@ -31,7 +31,10 @@
 /home/amin/ProcessManager/bin/Debug/net8.0/CommunityToolkit.Mvvm.dll
 /home/amin/ProcessManager/bin/Debug/net8.0/HarfBuzzSharp.dll
 /home/amin/ProcessManager/bin/Debug/net8.0/MicroCom.Runtime.dll
+/home/amin/ProcessManager/bin/Debug/net8.0/ScottPlot.dll
+/home/amin/ProcessManager/bin/Debug/net8.0/ScottPlot.Avalonia.dll
 /home/amin/ProcessManager/bin/Debug/net8.0/SkiaSharp.dll
+/home/amin/ProcessManager/bin/Debug/net8.0/SkiaSharp.HarfBuzz.dll
 /home/amin/ProcessManager/bin/Debug/net8.0/System.IO.Pipelines.dll
 /home/amin/ProcessManager/bin/Debug/net8.0/Tmds.DBus.Protocol.dll
 /home/amin/ProcessManager/bin/Debug/net8.0/runtimes/win-arm64/native/av_libglesv2.dll

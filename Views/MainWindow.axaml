@@ -21,7 +21,6 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         
-        <!-- Заголовок -->
         <TextBlock Grid.Row="0"
                    Text="Диспетчер процессов"
                    FontSize="28"
@@ -29,7 +28,6 @@
                    Margin="0,0,0,20"
                    Foreground="#E0E0E0"/>
         
-        <!-- Вкладки -->
         <TabControl Grid.Row="1">
             <!-- Вкладка "Список" -->
             <TabItem Header="Список процессов">
@@ -46,7 +44,6 @@
                         <ColumnDefinition Width="350"/>
                     </Grid.ColumnDefinitions>
                     
-                    <!-- Кнопки сортировки и фильтрации -->
                     <Border Grid.Row="0" Grid.Column="0"
                             Background="#2D2D30" 
                             CornerRadius="4"
@@ -78,7 +75,6 @@
                         </StackPanel>
                     </Border>
                     
-                    <!-- Поиск и интервал -->
                     <Border Grid.Row="0" Grid.Column="1"
                             Background="#2D2D30" 
                             CornerRadius="4"
@@ -116,7 +112,6 @@
                         </StackPanel>
                     </Border>
                     
-                    <!-- Заголовки колонок -->
                     <Border Grid.Row="1" Grid.Column="0"
                             Background="#252526" 
                             Padding="10,8"
@@ -140,7 +135,6 @@
                         </Grid>
                     </Border>
                     
-                    <!-- Список процессов -->
                     <Border Grid.Row="2" Grid.Column="0"
                             Background="#1E1E1E" 
                             BorderBrush="#3E3E42" 
@@ -151,7 +145,6 @@
                         </ScrollViewer>
                     </Border>
                     
-                    <!-- Панель управления процессом -->
                     <Border Grid.Row="1" Grid.Column="1" Grid.RowSpan="2"
                             Background="#2D2D30"
                             CornerRadius="4"
@@ -254,7 +247,6 @@
                         </ScrollViewer>
                     </Border>
                     
-                    <!-- Кнопка обновления -->
                     <StackPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
                                 Orientation="Horizontal" 
                                 HorizontalAlignment="Right"
@@ -276,7 +268,6 @@
                 </Grid>
             </TabItem>
             
-            <!-- Вкладка "Дерево" -->
             <TabItem Header="Иерархия процессов">
                 <Grid Margin="10">
                     <Grid.RowDefinitions>
@@ -314,6 +305,58 @@
                                 </TreeView.ItemTemplate>
                             </TreeView>
                         </ScrollViewer>
+                    </Border>
+                </Grid>
+            </TabItem>
+            
+            <TabItem Header="Визуализация">
+                <Grid Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="10" Margin="0,0,0,10">
+                        <Button Content="Обновить графики"
+                                Click="UpdateCharts_Click"
+                                Padding="20,10"
+                                Background="#0E639C"
+                                Foreground="White"
+                                BorderThickness="0"/>
+                        <TextBlock Text="Нажмите для построения графиков"
+                                   VerticalAlignment="Center"
+                                   Foreground="#B0B0B0"/>
+                    </StackPanel>
+                    
+                    <Border Grid.Row="1" 
+                            Background="#2D2D30"
+                            CornerRadius="4"
+                            Padding="10"
+                            Margin="0,0,0,5">
+                        <StackPanel>
+                            <TextBlock Text="Загрузка CPU по ядрам"
+                                       FontSize="16"
+                                       FontWeight="Bold"
+                                       Foreground="White"
+                                       Margin="0,0,0,10"/>
+                            <Border x:Name="CpuChartContainer" Height="250"/>
+                        </StackPanel>
+                    </Border>
+                    
+                    <Border Grid.Row="2"
+                            Background="#2D2D30"
+                            CornerRadius="4"
+                            Padding="10"
+                            Margin="0,5,0,0">
+                        <StackPanel>
+                            <TextBlock Text="Топ-10 процессов по памяти"
+                                       FontSize="16"
+                                       FontWeight="Bold"
+                                       Foreground="White"
+                                       Margin="0,0,0,10"/>
+                            <Border x:Name="MemoryChartContainer" Height="250"/>
+                        </StackPanel>
                     </Border>
                 </Grid>
             </TabItem>

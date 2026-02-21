@@ -33,7 +33,10 @@
 /usr/lib/dotnet/packs/Microsoft.NETCore.App.Ref/8.0.24/ref/net8.0/Microsoft.Win32.Registry.dll
 /usr/lib/dotnet/packs/Microsoft.NETCore.App.Ref/8.0.24/ref/net8.0/mscorlib.dll
 /usr/lib/dotnet/packs/Microsoft.NETCore.App.Ref/8.0.24/ref/net8.0/netstandard.dll
+/home/amin/.nuget/packages/scottplot.avalonia/5.0.56/lib/net8.0/ScottPlot.Avalonia.dll
+/home/amin/.nuget/packages/scottplot/5.0.56/lib/net8.0/ScottPlot.dll
 /home/amin/.nuget/packages/skiasharp/2.88.9/lib/net6.0/SkiaSharp.dll
+/home/amin/.nuget/packages/skiasharp.harfbuzz/2.88.9/lib/net6.0/SkiaSharp.HarfBuzz.dll
 /usr/lib/dotnet/packs/Microsoft.NETCore.App.Ref/8.0.24/ref/net8.0/System.AppContext.dll
 /usr/lib/dotnet/packs/Microsoft.NETCore.App.Ref/8.0.24/ref/net8.0/System.Buffers.dll
 /usr/lib/dotnet/packs/Microsoft.NETCore.App.Ref/8.0.24/ref/net8.0/System.Collections.Concurrent.dll

@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using ProcessManager.Models;
 
 namespace ProcessManager.Services;
@@ -11,15 +13,15 @@ public class ProcessService
     {
         List<ProcessInfo> processList = new List<ProcessInfo>();
         Process[] processes = Process.GetProcesses();
-        
+
         foreach (Process process in processes)
         {
             try
             {
                 ProcessInfo info = new ProcessInfo
                 {
-                    Name = process.ProcessName,
                     Id = process.Id,
+                    Name = process.ProcessName,
                     Priority = process.PriorityClass,
                     MemoryUsage = process.WorkingSet64,
                     CpuTime = process.TotalProcessorTime,
@@ -32,10 +34,10 @@ public class ProcessService
                 // Пропускаем недоступные процессы
             }
         }
-        
+
         return processList;
     }
-    
+
     public bool SetProcessPriority(int processId, ProcessPriorityClass priority)
     {
         try
@@ -50,7 +52,7 @@ public class ProcessService
             return false;
         }
     }
-    
+
     public int GetProcessorCount()
     {
         return Environment.ProcessorCount;
@@ -66,7 +68,7 @@ public class ProcessService
         catch (Exception ex)
         {
             Console.WriteLine($"Ошибка получения affinity: {ex.Message}");
-            return -1;
+            return -1L;
         }
     }
 
@@ -84,26 +86,27 @@ public class ProcessService
             return false;
         }
     }
-    
+
     public List<ThreadInfo> GetProcessThreads(int processId)
     {
         List<ThreadInfo> threadList = new List<ThreadInfo>();
-        
+
         try
         {
             Process process = Process.GetProcessById(processId);
-            
+
             foreach (ProcessThread thread in process.Threads)
             {
                 try
                 {
-                    threadList.Add(new ThreadInfo
+                    ThreadInfo info = new ThreadInfo
                     {
                         Id = thread.Id,
                         Priority = thread.PriorityLevel,
                         State = thread.ThreadState,
                         CpuTime = thread.TotalProcessorTime
-                    });
+                    };
+                    threadList.Add(info);
                 }
                 catch
                 {
@@ -115,43 +118,56 @@ public class ProcessService
         {
             Console.WriteLine($"Ошибка получения потоков: {ex.Message}");
         }
-        
+
         return threadList;
     }
-    
-    public int GetParentProcessId(int processId)
+
+    public int? GetParentProcessId(int processId)
     {
-        try
+        if (processId <= 0)
         {
-            Process process = Process.GetProcessById(processId);
-        
-            // Используем WMI для получения родительского процесса (работает и на Linux через /proc)
-            ProcessStartInfo startInfo = new ProcessStartInfo
+            return null;
+        }
+
+        if (OperatingSystem.IsLinux())
+        {
+            try
             {
-                FileName = "ps",
-                Arguments = $"-o ppid= -p {processId}",
-                RedirectStandardOutput = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            };
-        
-            using (Process proc = Process.Start(startInfo))
-            {
-                if (proc != null)
+                string statusPath = $"/proc/{processId}/status";
+                if (!File.Exists(statusPath))
                 {
-                    string output = proc.StandardOutput.ReadToEnd().Trim();
-                    if (int.TryParse(output, out int parentId))
+                    return null;
+                }
+
+                string[] lines = File.ReadAllLines(statusPath);
+                string? ppidLine = null;
+
+                foreach (string line in lines)
+                {
+                    if (line.StartsWith("PPid:"))
                     {
-                        return parentId;
+                        ppidLine = line;
+                        break;
+                    }
+                }
+
+                if (ppidLine != null)
+                {
+                    string valuePart = ppidLine.Substring(5).Trim();
+                    if (int.TryParse(valuePart, out int ppid) && ppid > 0)
+                    {
+                        return ppid;
                     }
                 }
             }
+            catch
+            {
+                // ошибки чтения /proc игнорируем
+            }
+
+            return null;
         }
-        catch
-        {
-        }
-    
-        return 0;
+
+        return null;
     }
-    
 }
